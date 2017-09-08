@@ -1,5 +1,6 @@
- 
-(function(){ 
+var Mappy = (function(){ 
+	
+	
 	var map = new google.maps.Map(document.getElementById('the-map'), {
 			center : new google.maps.LatLng(39.7392358, -104.990251),
 			zoom : 4,
@@ -7,27 +8,56 @@
 			disableDefaultUI: true,
 			scrollwheel: false
 	});
+	
+	var form = document.getElementById("mapform");
+	form.onsubmit = function() {
+		return false;
+	}	
 
-	var infowindow = new google.maps.InfoWindow;
-	var marker, i;
+	
+	function pinBuilder(resp){
 
-	for (i = 0; i < locations.length; i++) {  
-			marker = new google.maps.Marker({
-					 position: new google.maps.LatLng(locations[i][1], locations[i][2]),
-					 map: map,
-			 animation: google.maps.Animation.DROP,
-			});
+		var infowindow = new google.maps.InfoWindow;
+		var marker, i;
 
+		marker = new google.maps.Marker({
+			position: new google.maps.LatLng(resp[1], resp[2]),
+			map: map,
+			animation: google.maps.Animation.DROP,
+		});
 
-			google.maps.event.addListener(marker, 'click', (function(marker, i) {
-					 return function() {
-							 infowindow.setContent(locations[i][0]);
-							 infowindow.open(map, marker);
-					 }
-			})(marker, i));
+		google.maps.event.addListener(marker, 'click', (function(marker, i) {
+			return function() {
+				 infowindow.setContent(resp[0]);
+				 infowindow.open(map, marker);
+			}
+		})(marker, i));
 
 	}
+
+	
+	return {
+
+    getPin: function() {  
+			
+			xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+
+				if (this.readyState == 4 && this.status == 200) {
+					pinBuilder(JSON.parse(xhttp.responseText));
+				}
+
+			};
+			
+			xhttp.open("GET", "pin_builder.php?CITY="+form.City.value+"&STATE="+form.State.value, true);
+			xhttp.send();   
+			
+		}
+
+	}
+	
 })();
+
 
 
 
